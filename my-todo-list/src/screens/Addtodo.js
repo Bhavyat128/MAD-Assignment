@@ -47,7 +47,7 @@ export default function Addtodo({ navigation }) {
       </View>
 
       <View style={styles.buttonContainer}>
-        <View style={{ flex:1, justifyContent: 'flex-start' }}>
+        <View style={{ flex:1, justifyContent: 'flex-start',marginLeft:30 }}>
           <ImageButton text=" Cancel" icon="backspace" fun={back} />
         </View>
         <View style={{ flex:1, justifyContent: 'flex-end' }}>
