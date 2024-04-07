@@ -1,28 +1,61 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView, TextInput, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, KeyboardAvoidingView, Button } from 'react-native';
 import TodoList from '../components/TodoList';
 import Title from '../components/Title';
 import { ImageButton } from '../components/ImageButton';
 import { useState } from 'react';
+import { loadData, saveData } from '../datamodel/data';
+import Modal from "react-native-modal";
 
 const activity = ['Study Cybersecurity', 'Execute program', 'Shopping List', 'Daily chores'];
-export default function Addtodo({ navigation }) {
-  const [tasks, setTasks] = useState([]);
+export default function Addtodo({ navigation, data }) {
+  // const [tasks, setTasks] = useState([]);
+  // const tasks = route && route.params ? route.params.tasks : [];
   const [text, setText] = useState('');
   const [taskdescr, setTaskDescription] = useState('');
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setmodalMessage] = useState('To do added successfully!!!');
 
-  const back = () => navigation.navigate("Home");
-  // const save = () => console.log("saved");
-  const addText = () => {
-    if (text === '') return
-    // const maxid = tasks.reduce((a, t) => Math.max(a, t.id), 0)
-    const maxid = tasks.length;
-    console.log("maxid: ", maxid, text)
-    setTasks(tasks => [...tasks, { id: maxid + 1, text: text, taskdescr: taskdescr, completed: false }])
+  // const back = () => navigation.navigate("Home");
+  // // const save = () => console.log("saved");
+  // const addText = () => {
+  //   if (text === '') return
+  //   // const maxid = tasks.reduce((a, t) => Math.max(a, t.id), 0)
+  //   const maxid = tasks.length;
+  //   console.log("maxid: ", maxid, text)
+  //   setTasks(tasks => [...tasks, { id: maxid + 1, text: text, taskdescr: taskdescr, completed: false }])
+  //   setText('');
+  //   setTaskDescription('')
+  //   console.log(tasks, maxid);
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  const addText = async () => {
+    // Add new task to the tasks array
+    const initData = await loadData();
+    setTasks(tasks => [...tasks, initData.Lists]);
+    console.log("Inittt", tasks);
+    const newTask = {
+      id: tasks.length + 1,
+      text: text.trim(),
+      taskdescr: taskdescr.trim(),
+      completed: false
+    };
+    const updatedTasks = [...tasks, newTask];
+    console.log("Navigating to TodoHome with tasks:", updatedTasks);
+
+    let savearray = {};
+    savearray = { Lists: updatedTasks };
+    saveData(savearray);
     setText('');
-    setTaskDescription('')
-    console.log(tasks, maxid);
-  }
+    setTaskDescription('');
+    setModalVisible(!isModalVisible);
+
+    // Navigate back to TodoHome screen with updated tasks
+    //  const addText=()=> navigation.navigate("TodoHome", { tasks: updatedTasks });
+
+  };
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <View style={styles.header}>
@@ -35,7 +68,9 @@ export default function Addtodo({ navigation }) {
             style={styles.tasktitle}
             value={text}
             onChangeText={setText}
-            onSubmitEditing={addText} />
+          // onSubmitEditing={addText} 
+
+          />
           <Text style={{ margin: 10 }}>Description</Text>
           <TextInput placeholder="Add a Task Description"
             multiline={true}
@@ -43,20 +78,33 @@ export default function Addtodo({ navigation }) {
             style={styles.descrtitle}
             value={taskdescr}
             onChangeText={setTaskDescription}
-            onSubmitEditing={addText} />
+          // onSubmitEditing={addText} 
+
+          />
 
         </ScrollView>
       </View>
 
       <View style={styles.buttonContainer}>
 
-        <ImageButton text="Back" icon="backspace" fun={back} />
+        <ImageButton text="Back" icon="backspace" fun={() => navigation.goBack()} />
 
 
-        <ImageButton style={{ marginLeft: 20 }} text="Save" icon="save-sharp" fun={addText} />
+        <ImageButton style={{ marginLeft: 20 }} text="Save" icon="save-sharp" fun={addText} disabled={text === '' || taskdescr === ''} />
 
 
       </View>
+      <Modal isVisible={isModalVisible} style={{ height: 200, width: 350, justifyContent: 'center', alignItems: 'center' }} animationType="slide">
+        <View style={{ backgroundColor: 'white', padding: 20 }}>
+
+          <Text style={{ marginTop: 10 }}>{modalMessage}</Text>
+
+          <View style={{ marginTop: 10 }}>
+            <Button title="Ok" onPress={toggleModal} />
+          </View>
+
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   )
 }
@@ -77,6 +125,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#a5cf82',
+
   },
 
   buttonContainer: {

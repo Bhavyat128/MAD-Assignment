@@ -3,17 +3,34 @@ import { StyleSheet, Text, View } from 'react-native';
 import TodoList from '../components/TodoList';
 import Title from '../components/Title';
 import { ImageButton } from '../components/ImageButton';
+import { useState, useEffect } from 'react';
+import { loadData,saveData } from '../datamodel/data';
 
-const activity = ['Study Cybersecurity', 'Execute program', 'Shopping List', 'Daily chores'];
-const task=[{ id: 1, text: 'write a code' },{ id: 2, text: 'shopping' },{ id: 3, text: 'Plan study' },{ id: 4, text: 'watch youtube' },{ id: 5, text: 'offensive cyber' },{ id: 6, text: 'project cyber' },{ id: 7, text: 'make breakfast' },{ id: 8, text: 'cook lunch' },{ id: 9, text: 'dinner menu' },{ id: 10, text: 'practise yoga' },{ id: 11, text: 'meditation' },{ id: 12, text: 'mobile time off' },{ id: 13, text: 'newspaper' },{ id: 14, text: 'Book reading' },{ id: 15, text: 'packed for tour' }]
+//const activity = ['Study Cybersecurity', 'Execute program', 'Shopping List', 'Daily chores'];
+//const task=[{ id: 1, text: 'write a code' },{ id: 2, text: 'shopping' },{ id: 3, text: 'Plan study' },{ id: 4, text: 'watch youtube' },{ id: 5, text: 'offensive cyber' },{ id: 6, text: 'project cyber' },{ id: 7, text: 'make breakfast' },{ id: 8, text: 'cook lunch' },{ id: 9, text: 'dinner menu' },{ id: 10, text: 'practise yoga' },{ id: 11, text: 'meditation' },{ id: 12, text: 'mobile time off' },{ id: 13, text: 'newspaper' },{ id: 14, text: 'Book reading' },{ id: 15, text: 'packed for tour' }]
 export default function TodoHome({ navigation }) {
-  const addNewTask = () => navigation.navigate("Addtodo")
+  // const {tasks}= route.params || { tasks: [] };
+  const [tasks, setTasks] = useState([]);
+  const addNewTask = () => navigation.navigate("Addtodo");
+
+  const firstLoad = async () => {
+    const myData = await loadData();
+    let lists = myData.Lists;
+    setTasks(lists);
+    // console.log('Initial Load Game',lists);
+  };
+
+  useEffect(() => {
+    //firstLoad();
+    let intervalId = setInterval(firstLoad, 2000);
+        return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <View style={styles.container}>
       <Title title="My Todo List" />
-      <View style={{flex:9}}>
-        <TodoList list={task} />
+      <View style={{ flex: 9 }}>
+        <TodoList list={tasks} />
       </View>
 
       <View style={styles.buttonContainer}>
@@ -37,8 +54,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     marginTop: 30,
-    justifyContent:'center',
-    alignContent:'center',
+    justifyContent: 'center',
+    alignContent: 'center',
 
   },
   title: {
