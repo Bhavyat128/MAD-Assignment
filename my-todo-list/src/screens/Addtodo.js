@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, KeyboardAvoidingView } from 'react-native';
 import TodoList from '../components/TodoList';
 import Title from '../components/Title';
 import { ImageButton } from '../components/ImageButton';
@@ -24,9 +24,11 @@ export default function Addtodo({ navigation }) {
     console.log(tasks, maxid);
   }
   return (
-    <View style={styles.container}>
-      <Title title="Add New Todo" />
-      <View style={{ flex: 9 }}>
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <View style={styles.header}>
+        <Title title="Add New Todo" />
+      </View>
+      <View style={styles.content}>
         <ScrollView>
           <Text style={{ margin: 10 }}>Title</Text>
           <TextInput placeholder="Add a Task"
@@ -47,15 +49,15 @@ export default function Addtodo({ navigation }) {
       </View>
 
       <View style={styles.buttonContainer}>
-        <View style={{ flex:1, justifyContent: 'flex-start',marginLeft:30 }}>
-          <ImageButton text=" Cancel" icon="backspace" fun={back} />
-        </View>
-        <View style={{ flex:1, justifyContent: 'flex-end' }}>
 
-          <ImageButton text=" Save" icon="save-sharp" fun={addText} />
-        </View>
+        <ImageButton text="Back" icon="backspace" fun={back} />
+
+
+        <ImageButton style={{ marginLeft: 20 }} text="Save" icon="save-sharp" fun={addText} />
+
+
       </View>
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -64,19 +66,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#a5cf82',
-   flexDirection:'column',
-  
+    flexDirection: 'column',
+
+  },
+  content: {
+    flex: 1,
+  },
+  header: {
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#a5cf82',
   },
 
   buttonContainer: {
-    
+
     flexDirection: 'row',
-    marginBottom:50,
+    //position:'absolute',
+    //marginBottom:50,
     justifyContent: 'center',
     alignContent: 'center',
-    padding:7,
+    paddingTop: 20,
     borderRadius: 10,
-    alignItems:'baseline',
+    alignItems: 'baseline',
 
   },
   title: {
