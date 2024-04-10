@@ -2,17 +2,22 @@ import { Text, View, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 
-export const ImageButton = ({ text, icon, disabled, width = 150, fun = () => console.log("clicked") }) => {
+export const ImageButton = ({ text, icon, disabled, width = 150, color='black', back='yes', fun = () => console.log("clicked") }) => {
     return (
         <Pressable
             style={({ pressed }) => (pressed || disabled ? { opacity: 0.5 } : {})}
             onPress={fun}
             disabled={disabled}
         >
-            <View style={[styles.container,{width:width}]}>
-                <Ionicons name={icon} size={30} color="black" />
+            {back=='yes' && <View style={[styles.container,{width:width}]}>
+                <Ionicons name={icon} size={30} color={color} />
                 <Text style={styles.text}>{text}</Text>
-            </View>
+            </View>}
+            {back=='no' && <View >
+                <Ionicons name={icon} size={30} color={color} />
+                <Text style={styles.text}>{text}</Text>
+            </View>}
+            
         </Pressable >
     );
 };

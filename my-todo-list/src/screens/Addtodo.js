@@ -9,7 +9,7 @@ import Modal from "react-native-modal";
 
 const activity = ['Study Cybersecurity', 'Execute program', 'Shopping List', 'Daily chores'];
 export default function Addtodo({ navigation, data }) {
-  // const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([]);
   // const tasks = route && route.params ? route.params.tasks : [];
   const [text, setText] = useState('');
   const [taskdescr, setTaskDescription] = useState('');
@@ -35,15 +35,20 @@ export default function Addtodo({ navigation, data }) {
     // Add new task to the tasks array
     const initData = await loadData();
     setTasks(tasks => [...tasks, initData.Lists]);
-    console.log("Inittt", tasks);
+    //console.log("Inittt", tasks);
+    const old = initData.Lists;
+    let dataid = 0;
+    dataid = old.reduce((h, c) => { return Math.max(c.id) }, 0);
     const newTask = {
-      id: tasks.length + 1,
+      id: dataid + 1,
       text: text.trim(),
       taskdescr: taskdescr.trim(),
-      completed: false
+      completed: false,
+      expanded: false,
     };
-    const updatedTasks = [...tasks, newTask];
-    console.log("Navigating to TodoHome with tasks:", updatedTasks);
+
+    const updatedTasks = [...old, newTask];
+    //console.log("Navigating to TodoHome with tasks:", updatedTasks);
 
     let savearray = {};
     savearray = { Lists: updatedTasks };
@@ -63,7 +68,7 @@ export default function Addtodo({ navigation, data }) {
       </View>
       <View style={styles.content}>
         <ScrollView>
-          <Text style={{ margin: 10 }}>Title</Text>
+          <Text style={{ margin: 10, fontSize:20 }}>Title</Text>
           <TextInput placeholder="Add a Task"
             style={styles.tasktitle}
             value={text}
@@ -71,7 +76,7 @@ export default function Addtodo({ navigation, data }) {
           // onSubmitEditing={addText} 
 
           />
-          <Text style={{ margin: 10 }}>Description</Text>
+          <Text style={{ margin: 10,fontSize:20 }}>Description</Text>
           <TextInput placeholder="Add a Task Description"
             multiline={true}
             numberOfLines={5}

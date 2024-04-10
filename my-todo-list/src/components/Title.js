@@ -1,6 +1,6 @@
 import { Text, View, StyleSheet, Pressable } from "react-native";
 
-export const Title = ({ title }) => {
+export default Title = ({ title }) => {
     return (
         <View style={styles.title}>
         <Text style={{ textAlign: 'center', fontSize: 35,fontStyle: 'italic', fontWeight: '500' }}> {title}</Text>
@@ -21,4 +21,3 @@ const styles = StyleSheet.create({
       },
 
 });
-export default Title;

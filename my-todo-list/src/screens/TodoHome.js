@@ -4,7 +4,9 @@ import TodoList from '../components/TodoList';
 import Title from '../components/Title';
 import { ImageButton } from '../components/ImageButton';
 import { useState, useEffect } from 'react';
-import { loadData,saveData } from '../datamodel/data';
+import { loadData, saveData } from '../datamodel/data';
+import { useIsFocused } from '@react-navigation/native';
+
 
 //const activity = ['Study Cybersecurity', 'Execute program', 'Shopping List', 'Daily chores'];
 //const task=[{ id: 1, text: 'write a code' },{ id: 2, text: 'shopping' },{ id: 3, text: 'Plan study' },{ id: 4, text: 'watch youtube' },{ id: 5, text: 'offensive cyber' },{ id: 6, text: 'project cyber' },{ id: 7, text: 'make breakfast' },{ id: 8, text: 'cook lunch' },{ id: 9, text: 'dinner menu' },{ id: 10, text: 'practise yoga' },{ id: 11, text: 'meditation' },{ id: 12, text: 'mobile time off' },{ id: 13, text: 'newspaper' },{ id: 14, text: 'Book reading' },{ id: 15, text: 'packed for tour' }]
@@ -12,6 +14,7 @@ export default function TodoHome({ navigation }) {
   // const {tasks}= route.params || { tasks: [] };
   const [tasks, setTasks] = useState([]);
   const addNewTask = () => navigation.navigate("Addtodo");
+  const isFocused = useIsFocused();
 
   const firstLoad = async () => {
     const myData = await loadData();
@@ -21,16 +24,16 @@ export default function TodoHome({ navigation }) {
   };
 
   useEffect(() => {
-    //firstLoad();
-    let intervalId = setInterval(firstLoad, 2000);
-        return () => clearInterval(intervalId);
-  }, []);
+    if (isFocused) {
+      firstLoad();
+    }
+  }, [isFocused]);
 
   return (
     <View style={styles.container}>
       <Title title="My Todo List" />
       <View style={{ flex: 9 }}>
-        <TodoList list={tasks} />
+        <TodoList lists={tasks} />
       </View>
 
       <View style={styles.buttonContainer}>

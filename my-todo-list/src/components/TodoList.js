@@ -1,33 +1,54 @@
-import { View, Text, StyleSheet, FlatList,Button } from "react-native";
+import { View, Text, StyleSheet, FlatList, Button, Pressable } from "react-native";
 import { ImageButton } from "./ImageButton";
 import Modal from "react-native-modal";
 import { useEffect, useState } from "react";
-import { loadData,saveData } from "../datamodel/data";
+import { loadData, saveData } from "../datamodel/data";
+import { Ionicons } from "@expo/vector-icons";
+import { useIsFocused } from '@react-navigation/native';
 
-export const TodoList = ({ list }) => {
+export default TodoList = ({ lists }) => {
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalMessage, setmodalMessage] = useState('Finished Task!!!');
     const [deleteIndex, setDeleteIndex] = useState(-1);
+    const [list, setTasks] = useState([]);
+    const isFocused = useIsFocused();
+    
 
-    const handleTaskPress = (taskId) => {
-        // Navigate to a task detail screen, passing the taskId
-        // navigation.navigate("TaskDetail", { taskId });
-
+    const firstLoad = async () => {
+        const myData = await loadData();
+        let lists = myData.Lists;
+        setTasks(lists);
+        expand(lists);
+        // console.log('Initial Load Game',lists);
     };
-    // const onComplete = () => {
-    //     console.log("Complete");
+  
+    useEffect(() => {
+        if (isFocused) {
+            firstLoad();
+        }
+    }, [isFocused]);
 
-    // };
-    // const onDelete = () => {
-    //     console.log("Deleted");
+    const expand = async (arr) => {
+        let fetch = [];
+        let filtered = [];
+ 
+        fetch = [...arr];
+        filtered = fetch.map(i => {
+            const da = { ...i };
+            if (da.expanded) {
+                da.expanded = false;
+            }
+            return da
+        });
+        setTasks(filtered);
+    };
 
-    // };
     const onComplete = async (selected) => {
-        console.log("Finish this", selected);
+        //console.log("Finish this", selected);
         let fetch = [];
         let filtered = [];
         fetch = [...list];
-        console.log("Fetch", fetch)
+        //console.log("Fetch", fetch)
         filtered = fetch.map(i => {
             const li = { ...i };
             if (i.id === selected) {
@@ -35,14 +56,15 @@ export const TodoList = ({ list }) => {
             }
             return li
         });
-        console.log("Filtered", filtered)
+        // console.log("Filtered", filtered)
         let arrayToSave = {};
         arrayToSave = { Lists: filtered };
         saveData(arrayToSave);
+        firstLoad();
         setmodalMessage('Completed Successfully!!!')
         setModalVisible(!isModalVisible);
     };
- 
+
     const onDelete = (index) => {
         setDeleteIndex(index);
         setmodalMessage('Delete confirmed?')
@@ -53,19 +75,35 @@ export const TodoList = ({ list }) => {
         let fetch = [];
         let filtered = [];
         fetch = [...list];
-        console.log("Fetch", fetch)
+        //console.log("Fetch", fetch)
         filtered = fetch.filter(i => i.id != deleteIndex);
         let arrayToSave = {};
         arrayToSave = { Lists: filtered };
         saveData(arrayToSave);
+        firstLoad();
         setmodalMessage('Deleted Successfully!!!')
         setModalVisible(true);
         // console.log("Game Entry Deleted", deleteIndex, filtered);
-        console.log("Updated Data", arrayToSave);
+        //console.log("Updated Data", arrayToSave);
     };
     const toggleModal = () => {
         setModalVisible(!isModalVisible);
     };
+
+    const clickDiv = (id) => {
+        const updatedData = list.map((item) => {
+            const updated = { ...item };
+            if (item.id === id) {
+                updated.expanded = !item.expanded;
+            }
+            return updated;
+        });
+        //console.log("Updated", updatedData)
+        setTasks(updatedData);
+        let arrayToSave = { Lists: updatedData };
+        saveData(arrayToSave);
+    };
+
     return (
 
         <View style={styles.List}>
@@ -73,34 +111,56 @@ export const TodoList = ({ list }) => {
                 data={list}
                 renderItem={({ item }) => (
                     <View style={[styles.box, { flexDirection: 'column' }]} >
-                        <Text style={{ color: 'black', fontSize: 18, marginLeft: 10 }}>{item.text}</Text>
-                        <View style={{ flexDirection: 'row' }}>
-                            <View style={{ marginRight: 40 }}>
-                                {!(item.completed) &&<ImageButton text="" icon="checkmark-circle" width={40} fun={onComplete.bind(this, item.id)} />}
-                            </View>
-                            <View style={{ marginRight: 40 }}>
-                                <ImageButton text="" icon="trash" width={40} fun={onDelete.bind(this, item.id)} />
-                            </View>
-                        </View>
-                        <Modal isVisible={isModalVisible} style={{ height: 200, width: 350, justifyContent: 'center', alignItems: 'center' }} animationType="slide">
-                            <View style={{ backgroundColor: 'white', padding: 20 }}>
+                        <Pressable onPress={() => clickDiv(item.id)}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
-                                <Text style={{ marginTop: 10 }}>{modalMessage}</Text>
-
-                                {modalMessage === 'Delete confirmed?' && <View style={{ marginTop: 10 }}>
-                                    <Button title="Yes" onPress={onDeleteConfirm} />
-                                </View>}
-                                {(modalMessage === 'Completed Successfully!!!') && <View style={{ marginTop: 10 }}>
-                                    <Button title="Ok" onPress={toggleModal} />
-                                </View>}
-                                {(modalMessage === 'Deleted Successfully!!!') && <View style={{ marginTop: 10 }}>
-                                    <Button title="Ok" onPress={toggleModal} />
-                                </View>}
-                                {modalMessage === 'Delete confirmed?' && <View style={{ marginTop: 10 }}>
-                                    <Button title="Cancel" onPress={toggleModal} />
-                                </View>}
+                                <Text style={{ fontWeight: '700', fontSize: 25 }}>{item.text}</Text>
+                                <View>
+                                    {(item.expanded) && <Ionicons
+                                        name="caret-up"
+                                        size={20}
+                                        color="black"
+                                    />}
+                                    {!(item.expanded) && <Ionicons
+                                        name="caret-down"
+                                        size={20}
+                                        color="black"
+                                    />}
+                                </View>
                             </View>
-                        </Modal>
+                        </Pressable>
+                        {(item.expanded) && (
+                            <View>
+                                <Text style={[styles.innertext, { fontWeight: '700' }]}>{item.taskdescr}</Text>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ marginLeft: 280 }}>
+                                        {!(item.completed) && <ImageButton text="" color="green" back='no' icon="checkmark-circle" width={40} fun={onComplete.bind(this, item.id)} />}
+                                    </View>
+                                    <View style={{ marginLeft: 10 }}>
+                                        <ImageButton text="" icon="trash" color="red" back='no' width={40} fun={onDelete.bind(this, item.id)} />
+                                    </View>
+                                </View>
+                                <Modal isVisible={isModalVisible} style={{ height: 200, width: 350, justifyContent: 'center', alignItems: 'center' }} animationType="slide">
+                                    <View style={{ backgroundColor: 'white', padding: 20 }}>
+
+                                        <Text style={{ marginTop: 10 }}>{modalMessage}</Text>
+
+                                        {modalMessage === 'Delete confirmed?' && <View style={{ marginTop: 10 }}>
+                                            <Button title="Yes" onPress={onDeleteConfirm} />
+                                        </View>}
+                                        {(modalMessage === 'Completed Successfully!!!') && <View style={{ marginTop: 10 }}>
+                                            <Button title="Ok" onPress={toggleModal} />
+                                        </View>}
+                                        {(modalMessage === 'Deleted Successfully!!!') && <View style={{ marginTop: 10 }}>
+                                            <Button title="Ok" onPress={toggleModal} />
+                                        </View>}
+                                        {modalMessage === 'Delete confirmed?' && <View style={{ marginTop: 10 }}>
+                                            <Button title="Cancel" onPress={toggleModal} />
+                                        </View>}
+                                    </View>
+                                </Modal>
+                            </View>
+                        )}
                     </View>
 
                 )}
@@ -120,11 +180,10 @@ const styles = StyleSheet.create({
     },
 
     box: {
-        height: 70,
-        backgroundColor: '#5ab53c',
+        // height: 70,
+        backgroundColor: '#CDF4BD',
         margin: 5,
         flexDirection: 'row',
         borderRadius: 5,
     }
 });
-export default TodoList;
